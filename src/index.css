@@ -1,0 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+}
+
+:root {
+  --bg: #f8fafc;
+  --ink: #0f172a;
+  --accent: #2563eb;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #e11d48;
+  --line: #e2e8f0;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+}
+
+.technical-grid {
+  background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.markdown-body h1 { @apply text-xl font-bold text-slate-800 mb-4; }
+.markdown-body h2 { @apply text-lg font-bold text-slate-800 mb-3; }
+.markdown-body p { @apply mb-3 text-sm leading-relaxed text-slate-600; }
+.markdown-body ul { @apply list-disc ml-5 mb-4 text-sm text-slate-600; }
+.markdown-body code { @apply bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded font-mono text-xs border border-slate-200; }
+.markdown-body pre { @apply bg-slate-900 text-slate-100 p-4 rounded-xl font-mono text-xs mb-4 overflow-x-auto shadow-inner; }

@@ -1,0 +1,105 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny ALL
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isEmailVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Knowledge Base Rules
+    match /knowledge_base/{articleId} {
+      function isValidArticle(data) {
+        return data.title is string && data.title.size() <= 200 &&
+               data.content is string && data.content.size() <= 10000 &&
+               data.category is string && data.category.size() <= 50;
+      }
+
+      allow read: if isSignedIn();
+      // Only admins should write, but for this demo let's allow verified users to contribute
+      allow create: if isEmailVerified() && isValidArticle(incoming());
+      allow update: if isEmailVerified() && isValidArticle(incoming()) && 
+                    incoming().diff(existing()).affectedKeys().hasOnly(['title', 'content', 'category', 'tags']);
+      allow delete: if isSignedIn();
+    }
+
+    // Tickets Rules
+    match /tickets/{ticketId} {
+      function isValidTicket(data) {
+        return data.subject is string && data.subject.size() <= 200 &&
+               data.description is string && data.description.size() <= 5000 &&
+               data.status in ['open', 'in_progress', 'escalated', 'resolved'] &&
+               data.priority in ['low', 'medium', 'high', 'urgent'] &&
+               data.technicianId == request.auth.uid;
+      }
+
+      // Technicians can read all tickets or only their own? 
+      // Usually technicians see all tickets in a shared workspace.
+      allow read: if isSignedIn();
+      
+      allow create: if isEmailVerified() && isValidTicket(incoming()) && 
+                    incoming().createdAt == request.time &&
+                    incoming().updatedAt == request.time;
+
+      allow update: if isEmailVerified() && (
+        // Action: Update status/priority
+        (incoming().diff(existing()).affectedKeys().hasOnly(['status', 'priority', 'updatedAt']) && 
+         incoming().updatedAt == request.time) ||
+        // Action: Full update (only by owner)
+        (isOwner(existing().technicianId) && isValidTicket(incoming()) && 
+         incoming().updatedAt == request.time)
+      );
+
+      // Sub-collection messages
+      match /messages/{messageId} {
+        function isValidMessage(data) {
+          return data.content is string && data.content.size() <= 5000 &&
+                 data.senderId is string &&
+                 (data.senderId == request.auth.uid || data.isBot == true);
+        }
+
+        allow read: if isSignedIn();
+        allow create: if isEmailVerified() && isValidMessage(incoming());
+      }
+    }
+
+    // Manuals Rules
+    match /manuals/{manualId} {
+      function isValidManual(data) {
+        return data.title is string && data.title.size() <= 200 &&
+               data.model is string && data.model.size() <= 100 &&
+               data.url is string && data.url.size() <= 1000;
+      }
+
+      allow read: if isSignedIn();
+      allow create: if isEmailVerified() && isValidManual(incoming());
+      allow update: if isEmailVerified() && isValidManual(incoming()) &&
+                    incoming().diff(existing()).affectedKeys().hasOnly(['title', 'model', 'url', 'size']);
+      allow delete: if isSignedIn();
+    }
+  }
+}

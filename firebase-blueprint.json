@@ -1,0 +1,77 @@
+{
+  "entities": {
+    "KnowledgeArticle": {
+      "title": "Knowledge Article",
+      "description": "Technical guide or troubleshooting information",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "category": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "content", "category"]
+    },
+    "Ticket": {
+      "title": "Support Ticket",
+      "description": "A service request or technical issue",
+      "type": "object",
+      "properties": {
+        "subject": { "type": "string" },
+        "description": { "type": "string" },
+        "status": { "type": "string", "enum": ["open", "in_progress", "escalated", "resolved"] },
+        "priority": { "type": "string", "enum": ["low", "medium", "high", "urgent"] },
+        "technicianId": { "type": "string" },
+        "technicianEmail": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["subject", "description", "status", "priority", "technicianId"]
+    },
+    "Message": {
+      "title": "Ticket Message",
+      "description": "A message within a support ticket thread",
+      "type": "object",
+      "properties": {
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string" },
+        "content": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "isBot": { "type": "boolean" }
+      },
+      "required": ["senderId", "content", "timestamp"]
+    },
+    "TechnicalManual": {
+      "title": "Technical Manual",
+      "description": "Metadata for service manuals and technical documents",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "model": { "type": "string" },
+        "size": { "type": "string" },
+        "url": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "model", "url"]
+    }
+  },
+  "firestore": {
+    "/knowledge_base/{articleId}": {
+      "schema": "KnowledgeArticle",
+      "description": "Storage for documentation and FAQs"
+    },
+    "/manuals/{manualId}": {
+      "schema": "TechnicalManual",
+      "description": "Downloadable service manuals and technical sheets"
+    },
+    "/tickets/{ticketId}": {
+      "schema": "Ticket",
+      "description": "Support tickets for technical issues"
+    },
+    "/tickets/{ticketId}/messages/{messageId}": {
+      "schema": "Message",
+      "description": "Thread of conversation for a specific ticket"
+    }
+  }
+}

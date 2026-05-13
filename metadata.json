@@ -1,0 +1,6 @@
+{
+  "name": "Assistente TechService",
+  "description": "Plataforma de suporte técnico com assistente IA, base de conhecimento e escalonamento automático de chamados.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
